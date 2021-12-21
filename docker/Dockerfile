@@ -14,11 +14,18 @@ ENV MYSQL_USER=mysql \
 
 # 3rd party components
 RUN apt-get update \
-	&& apt-get install -y mysql-server \
+    && apt-get install -y autoconf automake libtool re2c flex make libssl-dev libbz2-dev libcurl4-openssl-dev unzip
+
+# MySQL
+RUN apt-get install -y mysql-server \
 	&& rm -rf /var/lib/mysql \
-	&& mkdir /var/lib/mysql \
-	&& apt-get install -y redis-server \
-	&& apt-get install -y beanstalkd 
+	&& mkdir /var/lib/mysql
+
+# Redis
+RUN apt-get -y apt-get install -y redis-server
+
+# Beanstalk
+RUN apt-get -y apt-get install -y beanstalkd
 
 # SSHD
 RUN apt-get -y install openssh-server \
@@ -36,16 +43,6 @@ RUN apt-get install -y spamassassin spamc psmisc \
     && sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/spamassassin \
     && sed -i 's/home-dir/home-dir -4/g' /etc/default/spamassassin 
 
-# More packages
-RUN apt-get install -y autoconf automake libtool re2c flex make libxml2-dev libssl-dev libbz2-dev libcurl4-openssl-dev \
-	libdb5.3-dev libjpeg-dev libpng-dev libxpm4 libfreetype6-dev libgmp3-dev libc-client2007e-dev libldap2-dev libmcrypt-dev \
-	libmhash-dev freetds-dev zlib1g-dev libmysqlclient-dev libncurses5-dev libpcre3-dev unixodbc-dev libsqlite0-dev libaspell-dev \
-	libreadline6-dev librecode-dev libsnmp-dev libtidy-dev libxslt1-dev libssl-dev libxml2 libxml2-dev libpspell-dev libicu-dev \
-	sysstat libwww-perl nasm php-zip unzip mysql-client php-mysql php-xdebug pflogsumm mailutils nginx psmisc \
-	build-essential chrpath libssl-dev libxft-dev libfreetype6-dev libfreetype6 libfontconfig1-dev libfontconfig1  \
-	monit iotop openssh-client php-dev php-gd gsutil php-redis php-gmp xfsprogs php-soap php-mbstring php-curl \
-	php-xml php-mailparse php-mysql php-zip vim net-tools telnet git rsyslog php-pgsql
-RUN apt-get remove -y apache2* sendmail* mlocate php-ssh2
 
 # Postgres
 RUN apt-get install postgresql postgis postgresql-12-postgis-3
@@ -54,6 +51,18 @@ RUN /etc/init.d/postgresql start
 RUN su -c "psql -c \"CREATE USER iznik WITH PASSWORD 'iznik'\";" postgres
 RUN su -c "psql -c \"ALTER ROLE iznik superuser;\"" postgres
 RUN su -c "psql -c \"CREATE DATABASE iznik;\"" postgres
+
+
+# PHP
+RUN apt-get install -y mysql-client php-xdebug pflogsumm mailutils nginx psmisc \
+    build-essential chrpath libssl-dev libxft-dev libfreetype6-dev libfreetype6 libfontconfig1-dev libfontconfig1  \
+    monit iotop openssh-client php-dev php-gd gsutil php-redis php-gmp xfsprogs php-soap php-mbstring php-curl \
+    php-xml php-mailparse php-mysql php-zip vim net-tools telnet git rsyslog php-pgsql  libdb5.3-dev libxml2-dev \
+    libjpeg-dev libpng-dev libxpm4 libfreetype6-dev libgmp3-dev libc-client2007e-dev libldap2-dev libmcrypt-dev \
+	libmhash-dev freetds-dev zlib1g-dev libmysqlclient-dev libncurses5-dev libpcre3-dev unixodbc-dev libsqlite0-dev libaspell-dev \
+	libreadline6-dev librecode-dev libsnmp-dev libtidy-dev libxslt1-dev libssl-dev libxml2 libxml2-dev libpspell-dev libicu-dev \
+	sysstat libwww-perl nasm
+RUN apt-get remove -y apache2* sendmail* mlocate php-ssh2
 
 # GeoIP
 #
